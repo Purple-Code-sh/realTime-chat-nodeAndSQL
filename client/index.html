@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Chat</title>
     <style>
+        :root{
+            color-scheme: light dark;
+        }
         body{
            font-family:  Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
            display: grid;
@@ -26,7 +29,10 @@
 </head>
 <body>
     <section id="chat">
-        <form></form>
+        <form>
+            <input type="text" name="message" id="input" placeholder=" Type a message" autocomplete="off">
+            <button type="submit">Enviar</button>
+        </form>
     </section>
     
 </body>
