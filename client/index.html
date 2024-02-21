@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Chat</title>
+    <script type="module">
+        import io from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js'
+
+        const socket = io()
+
+        const form = document.getElementById("form")
+        const inputt = document.getElementById("input")
+        const messages = document.getElementById('messages')
+
+        socket.on('chat message', (msg)=>{
+            const item = `<li>${msg}</li>`
+            messages.insertAdjacentHTML('beforeend', item )
+        })
+
+        form.addEventListener('submit',(e)=>{
+            e.preventDefault()
+
+            if (inputt.value) {
+                socket.emit('chat message', input.value)
+            }
+
+            inputt.value = ''
+        })
+    </script>
     <style>
         :root{
             color-scheme: light dark;
@@ -25,11 +49,46 @@
             height: 90%;
             position: relative;
         }
+
+        #form{
+            bottom: 0;
+            left: 0;
+            right: 0;
+            position: absolute;
+            display: flex;
+            height: 48px;
+            padding: 4px;
+        }
+
+        #input{
+            border-radius: 9999px;
+            border: 1px solid violet;
+            flex: 1;
+            margin: 4px;
+            padding: 0 8px;
+        }
+        
+        #input:focus{
+            outline: 0;
+        }
+
+        #form > button{
+            background: violet;
+            color: #11111a;
+            border: 0;
+            margin: 4px;
+            border-radius: 6px;
+        }
+        #form > button:hover{
+            background: purple;
+            color: whitesmoke;
+        }
     </style>
 </head>
 <body>
     <section id="chat">
-        <form>
+        <ul id="messages"></ul>
+        <form id="form">
             <input type="text" name="message" id="input" placeholder=" Type a message" autocomplete="off">
             <button type="submit">Enviar</button>
         </form>

@@ -9,12 +9,24 @@ const app = express()
 const server = createServer(app)
 const io = new Server(server)
 
+io.on('connection', (socket) => {
+  console.log('An user has connected')
+
+  socket.on('disconnect', () => {
+    console.log('An user has disconnected')
+  })
+
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg)
+  })
+})
+
 app.use(loger('dev'))
 
 app.get('/', (req, res) => {
   res.sendFile(process.cwd() + '/client/index.html')
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
 })
