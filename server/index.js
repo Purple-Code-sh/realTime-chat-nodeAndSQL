@@ -23,7 +23,8 @@ const db = createClient({
 await db.execute(`
   CREATE TABLE IF NOT EXISTS messages(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT
+    content TEXT,
+    user TEXT
   )
 `)
 

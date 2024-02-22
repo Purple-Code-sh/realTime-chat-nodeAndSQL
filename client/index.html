@@ -13,6 +13,17 @@
             }
         })
 
+        const getUserName = async () =>{
+            const userName = localStorage.getItem('username')
+            if(userName){
+                console.log(`User existed ${userName}`);
+            } 
+            const res = await fetch('https://random-data-api.com/api/users/random_user')
+            const {userName: randomUsername} = await res.json()
+            localStorage.setItem('username',randomUsername)
+            return randomUsername 
+        }
+
         const form = document.getElementById("form")
         const inputt = document.getElementById("input")
         const messages = document.getElementById('messages')
