@@ -31,6 +31,7 @@
     })
 
     const form = document.getElementById('form')
+    const deleteMsgBtn = document.getElementById('deleteMsgBtn')
     const input = document.getElementById('input')
     const messages = document.getElementById('messages')
 
@@ -52,6 +53,11 @@
         socket.emit('chat message', input.value)
         input.value = ''
       }
+    })
+
+    deleteMsgBtn.addEventListener('click',()=>{
+        socket.emit('delete chat')
+        location.reload()
     })
   </script>
 
@@ -142,6 +148,26 @@
       background: purple;
       color: whitesmoke;
     }
+
+    #deleteMsgBtn{
+        background: purple;
+        color: black;
+        width: fit-content;
+        margin:auto;
+        border-radius: 9999px;
+        border: none;
+        padding: 8px 6px;
+        margin-top: 30px;
+    }
+
+    #deleteMsgBtn:hover{
+        background-color: rgb(190, 12, 36);
+        cursor: pointer;
+    }
+
+    #deleteMsgBtn:active{
+        color: white;
+    }
   </style>
 </head>
 
@@ -153,6 +179,7 @@
       <button type="submit">Enviar</button>
     </form>
   </section>
+  <button id="deleteMsgBtn" type="button" >Delete all messages</button>
 
 </body>
 

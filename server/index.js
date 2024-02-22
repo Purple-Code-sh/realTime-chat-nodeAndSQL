@@ -67,6 +67,18 @@ io.on('connection', async (socket) => {
       console.error(e)
     }
   }
+
+  socket.on('delete chat', async () => {
+    try {
+      await db.execute({
+        sql: 'DELETE FROM messages WHERE id > ?;',
+        args: [0]
+      })
+    } catch (e) {
+      console.error(e)
+      console.log('something happend')
+    }
+  })
 })
 
 app.use(logger('dev'))
