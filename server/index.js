@@ -24,7 +24,7 @@ await db.execute(`
   CREATE TABLE IF NOT EXISTS messages(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT,
-    user TEXT
+    userName TEXT
   )
 `)
 
@@ -36,28 +36,29 @@ io.on('connection', async (socket) => {
   })
 
   socket.on('chat message', async (msg) => {
+    const userName = socket.handshake.auth.userName ?? 'anonymus'
     let result
     try {
       result = await db.execute({
-        sql: 'INSERT INTO messages (content) VALUES (:msg)',
-        args: { msg }
+        sql: 'INSERT INTO messages (content, userName) VALUES (:msg, :userName)',
+        args: { msg, userName }
       })
     } catch (error) {
       console.error(error)
       return
     }
-    io.emit('chat message', msg, result.lastInsertRowid.toString())
+    io.emit('chat message', msg, result.lastInsertRowid.toString(), userName)
   })
 
   if (!socket.recovered) {
     try {
       const result = await db.execute({
-        sql: 'SELECT id, content FROM messages WHERE id > ?',
+        sql: 'SELECT id, content, userName FROM messages WHERE id > ?',
         args: [socket.handshake.auth.serverOffset ?? 0]
       })
 
       result.rows.forEach(row => {
-        socket.emit('chat message', row.content, row.id.toString())
+        socket.emit('chat message', row.content, row.id.toString(), row.userName)
       })
     } catch (error) {
       console.error(error)
