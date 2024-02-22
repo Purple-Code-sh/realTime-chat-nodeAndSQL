@@ -1,13 +1,14 @@
 import express from 'express'
-import loger from 'morgan'
-import { Server } from 'socket.io'
-import { createServer } from 'node:http'
+import logger from 'morgan'
+import dotenv from 'dotenv'
 import { createClient } from '@libsql/client'
 
-import dotenv from 'dotenv'
+import { Server } from 'socket.io'
+import { createServer } from 'node:http'
+
 dotenv.config()
 
-const port = process.env.PORT ?? 1999
+const port = process.env.PORT ?? 3000
 
 const app = express()
 const server = createServer(app)
@@ -21,52 +22,54 @@ const db = createClient({
 })
 
 await db.execute(`
-  CREATE TABLE IF NOT EXISTS messages(
+  CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT,
-    userName TEXT
+    user TEXT
   )
 `)
 
 io.on('connection', async (socket) => {
-  console.log('An user has connected')
+  console.log('a user has connected!')
 
   socket.on('disconnect', () => {
-    console.log('An user has disconnected')
+    console.log('an user has disconnected')
   })
 
   socket.on('chat message', async (msg) => {
-    const userName = socket.handshake.auth.userName ?? 'anonymus'
     let result
+    const username = socket.handshake.auth.username ?? 'anonymous'
+    console.log({ username })
     try {
       result = await db.execute({
-        sql: 'INSERT INTO messages (content, userName) VALUES (:msg, :userName)',
-        args: { msg, userName }
+        sql: 'INSERT INTO messages (content, user) VALUES (:msg, :username)',
+        args: { msg, username }
       })
-    } catch (error) {
-      console.error(error)
+    } catch (e) {
+      console.error(e)
       return
     }
-    io.emit('chat message', msg, result.lastInsertRowid.toString(), userName)
+
+    io.emit('chat message', msg, result.lastInsertRowid.toString(), username)
   })
 
-  if (!socket.recovered) {
+  if (!socket.recovered) { // <- recuperase los mensajes sin conexión
     try {
-      const result = await db.execute({
-        sql: 'SELECT id, content, userName FROM messages WHERE id > ?',
+      const results = await db.execute({
+        sql: 'SELECT id, content, user FROM messages WHERE id > ?',
         args: [socket.handshake.auth.serverOffset ?? 0]
       })
 
-      result.rows.forEach(row => {
-        socket.emit('chat message', row.content, row.id.toString(), row.userName)
+      results.rows.forEach(row => {
+        socket.emit('chat message', row.content, row.id.toString(), row.user)
       })
-    } catch (error) {
-      console.error(error)
+    } catch (e) {
+      console.error(e)
     }
   }
 })
 
-app.use(loger('dev'))
+app.use(logger('dev'))
 
 app.get('/', (req, res) => {
   res.sendFile(process.cwd() + '/client/index.html')
